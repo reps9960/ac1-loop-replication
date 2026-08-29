@@ -43,7 +43,7 @@ state p  ──►  prefix  ──►  reply  ──►  sensor reads the reply 
 | **E1** placebo | Is the *content* of the state causal, or just the presence of a prefix / an embedded instruction? | Under a **weak** posterior: TRUE ≈ SCRAMBLED, NUMBERS_ONLY ≈ NULL. The strategy *line* carries the visible effect, not the numbers — at low confidence. |
 | **E2** factorial | State × gate × monologue × strategy, clamped to each mode. Calibration + confound isolation. | Under a **strong** clamped posterior the mode **predicts** reply behaviour (calibration holds). Strategy line disciplines strongly; gate token is a minor, non-uniform channel; monologue sharpens state-consistent behaviour. **Corrects E1**: bare state numbers are *not* universally inert — that was a weak-state artefact. |
 | **E3** modegame | Hidden-mode inference vs **honest** baselines, ground-truth scored. | Loop **0.60**, honest single-shot LLM **0.60**, random **0.233** (chance 0.20). The loop infers a hidden mode at 3× chance; it *ties* the honest baseline, so on short evidence the filter buys persistence, not raw accuracy. A bare LLM is **not** at chance here. |
-| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong hysteresis** (loop area 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **One confound unresolved** (see below). |
+| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong hysteresis** (loop area 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **Confound resolved**: survives a decay-free (ρ=1.0) rerun (see below). |
 
 Full numbers with per-run notes are in [`results/`](results/); the narrative is
 in [`FINDINGS.md`](FINDINGS.md).
@@ -87,7 +87,7 @@ the Python standard library. Results append to `results/*.jsonl`.
 `selfmodel/sensor.py::_extract` falls back to `reasoning_content`; keep that if
 you point this at a reasoning model.
 
-## The one unresolved confound (E4)
+## The E4 confound — resolved
 
 The belief tracker's decay (`RHO = 0.97 < 1`) gives the posterior intrinsic
 inertia, so *some* of E4's stickiness is mechanical rather than emergent from the
@@ -97,10 +97,14 @@ loop. The decisive control is a decay-free rerun:
 SELFMODEL_RHO=1.0 python -m experiments.e4_hysteresis
 ```
 
-If the loop *still* holds the attractor with `RHO = 1.0`, the hysteresis exceeds
-filter mechanics and is a genuine loop effect. **This control is not yet done**,
-and until it is, E4 should be read as *suggestive of* — not proof of —
-loop-level path-dependence. Contributions welcome.
+**This control has now been run.** With `RHO = 1.0` (decay fully off), the loop
+area held at **0.115**, against **0.126** with decay on — essentially unchanged.
+Had the stickiness been mechanical filter inertia, removing the decay would have
+collapsed the loop area toward zero. It did not. The path-dependence therefore
+**survives a memoryless filter**, so it is an emergent property of the closed
+loop (state → reply → sensor → state), not an artefact of the estimator. The
+confound is resolved. (The transition remains *smooth* under both settings — so
+this demonstrates path-dependent memory, not a sharp phase transition.)
 
 ## Credit & license
 
