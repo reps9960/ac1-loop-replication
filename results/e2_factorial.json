@@ -1,0 +1,33 @@
+{
+  "experiment": "e2_factorial",
+  "note": "Clamped posterior (0.72 dominant), non-reasoning model, N=3, 2 prompts, 180 cells. Words per reply.",
+  "calibration": {
+    "exploring": {"words": 51.0, "q": 1.0},
+    "evaluating": {"words": 102.2, "q": 0.5},
+    "overwhelmed": {"words": 108.0, "q": 0.83},
+    "asserting": {"words": 46.0, "q": 0.5},
+    "disengaging": {"words": 133.5, "q": 0.5}
+  },
+  "strategy_effect_words": {
+    "exploring": {"numbers_only": 175.7, "with_strategy": 51.0},
+    "evaluating": {"numbers_only": 154.8, "with_strategy": 102.2},
+    "overwhelmed": {"numbers_only": 200.3, "with_strategy": 108.0},
+    "asserting": {"numbers_only": 202.5, "with_strategy": 46.0},
+    "disengaging": {"numbers_only": 173.0, "with_strategy": 133.5}
+  },
+  "gate_effect_words": {
+    "exploring": {"off": 51.0, "on": 46.2},
+    "evaluating": {"off": 102.2, "on": 78.0},
+    "overwhelmed": {"off": 108.0, "on": 137.0},
+    "asserting": {"off": 46.0, "on": 78.0},
+    "disengaging": {"off": 133.5, "on": 56.0}
+  },
+  "monologue_effect_words": {
+    "exploring": {"off": 51.0, "on": 62.5},
+    "evaluating": {"off": 102.2, "on": 106.3},
+    "overwhelmed": {"off": 108.0, "on": 76.0},
+    "asserting": {"off": 46.0, "on": 65.5},
+    "disengaging": {"off": 133.5, "on": 30.2}
+  },
+  "reading": "Under a STRONG clamped posterior the mode predicts reply behaviour (calibration holds). The strategy line disciplines/shortens strongly; the gate token moves length modestly and non-uniformly (not the main driver); the monologue sharpens state-consistent behaviour where the state is strongest. Corrects e1: bare state numbers are NOT universally inert -- that was a weak-state artefact."
+}

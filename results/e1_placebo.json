@@ -1,0 +1,9 @@
+{
+  "experiment": "e1_placebo",
+  "note": "Run against a mid-size instruct model at temp 0.9, N=6/arm, blind labeller on a separate model. State clamped weakly in an earlier variant; see FINDINGS for the strong-vs-weak-state nuance.",
+  "jsd_bits": {"TRUE|NULL": 0.0152, "TRUE|SCRAMBLED": 0.0069, "TRUE|NUMBERS_ONLY": 0.0177, "NUMBERS_ONLY|NULL": 0.0020},
+  "noise_floor": 0.109,
+  "mean_words": {"TRUE": 67.5, "SCRAMBLED": 46.3, "NUMBERS_ONLY": 98.4, "NULL": 95.3},
+  "q_rate": {"TRUE": 0.25, "SCRAMBLED": 0.17, "NUMBERS_ONLY": 0.41, "NULL": 0.50},
+  "reading": "Under a WEAK posterior, TRUE and SCRAMBLED are indistinguishable on the label channel and NUMBERS_ONLY collapses onto NULL: the strategy line carries the visible effect, not the state content. This is corrected by e2 under a strong clamped posterior."
+}

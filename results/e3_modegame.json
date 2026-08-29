@@ -1,0 +1,7 @@
+{
+  "experiment": "e3_modegame",
+  "note": "30 episodes, 3 simulated lines each, ground-truth scored, no judge model.",
+  "accuracy": {"loop": 0.60, "single": 0.60, "rand": 0.233},
+  "chance": 0.20,
+  "reading": "The sensor+filter loop infers a hidden mode at 3x chance. It TIES the honest single-shot LLM baseline (0.60), so on a 3-line task the filter buys persistence/state, not extra accuracy. Note the honest baseline is 0.60, NOT chance (0.20) -- reporting chance as the baseline would inflate any apparent loop gain."
+}
