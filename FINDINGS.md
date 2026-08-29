@@ -179,3 +179,22 @@ progress and will land as `results/e6_long.json`.
 path-dependence beyond filter arithmetic, of modest size (~0.07 in
 disengaging-mass loop area). Whether that memory amounts to true
 bistability — two attractors at identical input — remains open.
+
+**E6-long (N=100) — resolved: monostable.** At 100 turns the two
+trajectories converge on a single attractor (~0.60–0.66 disengaging mass at
+push 0.45); tail gaps fell from ~0.20 (N=30) to 0.07–0.08 and were still
+closing, with the lower trajectory still rising. **No bistability.** The
+correct picture is a single basin with slow, loop-amplified convergence:
+initial conditions remain visible for 100+ turns — real path-dependence over
+practical horizons — but asymptotically the loop has one resting state, not
+two. This further revises E4's "it stayed" reading: at long horizon it would
+not stay; the return is merely slow. (The e6 auto-verdict's phrase "any
+hysteresis is lag" overcorrects in the other direction — the E5-over-E5b
+excess is real and does not shrink with ramp rate; its mechanism is
+loop-amplified stiffening of convergence, not basins.)
+
+**Final claim of this series.** The closed loop adds modest, genuine memory:
+~0.07 of loop area beyond accumulator arithmetic, with initial-condition
+effects visible for 100+ turns — under a single attractor, with no sharp
+transition and no bistability. Every stronger reading tested here, including
+two of our own along the way, failed its control.

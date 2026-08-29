@@ -106,8 +106,11 @@ still produces loop areas of 0.10–0.15. The loop-attributable memory is the
 *excess* over that null — roughly **+0.06 to +0.08** at every ramp rate (E5),
 which does not shrink as ramps slow, ruling out viscous lag. So: the closed
 loop contributes genuine, rate-independent path-dependence, of modest size —
-about a third of the raw loop area. Whether it amounts to true bistability is
-open pending a long-run two-point basin test (E6). Full revision in
+about a third of the raw loop area. The long-run two-point basin test (E6,
+N=100) resolved the remaining question: **monostable** — one attractor, with
+initial conditions visible for 100+ turns before slow convergence. No
+bistability, no sharp transition; modest, genuine, precisely-bounded
+loop-borne memory. Full revision in
 [`FINDINGS.md`](FINDINGS.md); the null is `experiments/e5b_null.py` and runs in
 seconds with no endpoint. (The transition remains *smooth* under all settings —
 path-dependent memory, not a sharp phase transition.)
