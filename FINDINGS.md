@@ -113,7 +113,11 @@ path-dependent memory, not a sharp phase transition.)
 - calibration: the state predicts the system's own reply behaviour;
 - hidden-mode inference above chance (though at an honest baseline the gain is
   persistence);
-- genuine closed-loop path-dependence, as smooth hysteresis, **confirmed to survive a decay-free filter** (not an estimator artefact).
+- genuine closed-loop path-dependence, as smooth hysteresis. (An earlier
+  revision of this file called the decay-free rerun the decisive control and
+  the effect "not an estimator artefact" — the E5b null below revises that:
+  roughly two thirds of the raw loop area is accumulator arithmetic, and the
+  loop-attributable excess is ~0.06-0.08.)
 
 **Does not establish, and does not claim:**
 - any sharp phase transition (E4 is smooth);
@@ -125,12 +129,53 @@ path-dependent memory, not a sharp phase transition.)
 
 ## Open items
 
-1. ~~E4 with `SELFMODEL_RHO=1.0` — the decisive confound control.~~ **Done.**
-   Loop area held (0.115 vs 0.126); the hysteresis survives decay-off and is a
-   genuine loop effect.
+1. ~~E4 with `SELFMODEL_RHO=1.0` — the decisive confound control.~~ **Done —
+   and superseded.** Loop area held (0.115 vs 0.126), but E5b (below) shows
+   decay-off was the wrong decisive control: an undecayed accumulator is
+   path-dependent by construction. See the E5/E5b/E6 revision section.
 2. E3 at longer transcript lengths (T=10) — does the filter's persistence
    convert into an accuracy gain over the single-shot baseline?
 3. E2 replicated across several base models — how model-dependent are the
    calibration and channel effects?
 4. A monologue-continuity variant (feeding prior monologues back in) — does
    deliberative memory change any of the above?
+
+## Revision — what kind of memory? (E5, E5b, E6; 2026-08-29)
+
+E4 established path-dependence and framed the decay-free rerun as the decisive
+control. Three follow-ups sharpen — and soften — that reading. All at
+`SELFMODEL_RHO=1.0`, deepseek-v4-flash.
+
+**E5 (ramp-rate sweep).** Loop area vs turns-per-level K:
+
+| K | 1 | 3 | 6 | 12 |
+|---|---|---|---|----|
+| loop area | 0.161 | 0.210 | 0.213 | 0.231 |
+
+A lag/viscosity account predicts collapse toward zero as the ramp slows. The
+area grows instead: dwelling longer entrenches the state deeper. The memory
+is not lag.
+
+**E5b (state-decoupled null — the actual decisive control).** The identical
+ramp protocol with a likelihood that ignores the state entirely (no LLM at
+all) still yields areas of 0.10–0.15 with the same growth in K
+(deterministic null: 0.101 / 0.135 / 0.142 / 0.153). An accumulator at
+RHO=1.0 never forgets, so it is path-dependent by construction — which means
+E4's "survives decay-off" framing overstated what that rerun showed, and this
+file previously repeated the overstatement. The loop-attributable memory is
+the excess of E5 over the null: roughly **+0.06 to +0.08 at every K**, not
+shrinking as ramps slow. Real at every rate, not lag — but about a third of
+the raw area.
+
+**E6 (two-point basin test; clamped push 0.45, N=30).** Started from opposite
+dominant modes, trajectories held a ~0.20 gap after 30 turns — but the lower
+trajectory was still climbing, so N=30 cannot distinguish two attractors from
+slow convergence to one. `results/e6_bistability.json` ships with its
+automatic "bistable" verdict, which should be **disregarded**: the stability
+criterion passed on slow drift, not on a plateau. An N=100 rerun is in
+progress and will land as `results/e6_long.json`.
+
+**Revised claim.** The closed loop adds genuine, rate-independent
+path-dependence beyond filter arithmetic, of modest size (~0.07 in
+disengaging-mass loop area). Whether that memory amounts to true
+bistability — two attractors at identical input — remains open.

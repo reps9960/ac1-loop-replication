@@ -22,6 +22,7 @@ from .filter import MODES, normalise
 
 BASE_URL = os.environ.get("OPENAI_BASE_URL", "http://127.0.0.1:8001/v1")
 MODEL = os.environ.get("SELFMODEL_MODEL", "gpt-4o-mini")
+API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 
 def _extract(resp: dict) -> str:
@@ -42,7 +43,9 @@ def chat(system: str, user: str, temperature: float = 0.7,
         try:
             req = urllib.request.Request(
                 BASE_URL.rstrip("/") + "/chat/completions",
-                data=body, headers={"Content-Type": "application/json"})
+                data=body, headers={"Content-Type": "application/json",
+                                    **({"Authorization": "Bearer " + API_KEY}
+                                       if API_KEY else {})})
             with urllib.request.urlopen(req, timeout=120) as r:
                 out = _extract(json.loads(r.read().decode()))
             if out:
