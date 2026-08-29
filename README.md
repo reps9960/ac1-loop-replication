@@ -43,7 +43,7 @@ state p  ──►  prefix  ──►  reply  ──►  sensor reads the reply 
 | **E1** placebo | Is the *content* of the state causal, or just the presence of a prefix / an embedded instruction? | Under a **weak** posterior: TRUE ≈ SCRAMBLED, NUMBERS_ONLY ≈ NULL. The strategy *line* carries the visible effect, not the numbers — at low confidence. |
 | **E2** factorial | State × gate × monologue × strategy, clamped to each mode. Calibration + confound isolation. | Under a **strong** clamped posterior the mode **predicts** reply behaviour (calibration holds). Strategy line disciplines strongly; gate token is a minor, non-uniform channel; monologue sharpens state-consistent behaviour. **Corrects E1**: bare state numbers are *not* universally inert — that was a weak-state artefact. |
 | **E3** modegame | Hidden-mode inference vs **honest** baselines, ground-truth scored. | Loop **0.60**, honest single-shot LLM **0.60**, random **0.233** (chance 0.20). The loop infers a hidden mode at 3× chance; it *ties* the honest baseline, so on short evidence the filter buys persistence, not raw accuracy. A bare LLM is **not** at chance here. |
-| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong hysteresis** (loop area 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **Confound resolved**: survives a decay-free (ρ=1.0) rerun (see below). |
+| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong hysteresis** (loop area 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **Confound revisited**: survives a decay-free (ρ=1.0) rerun, but see the E5b null below — the loop-attributable share is ~a third of this area. |
 
 Full numbers with per-run notes are in [`results/`](results/); the narrative is
 in [`FINDINGS.md`](FINDINGS.md).
@@ -87,7 +87,7 @@ the Python standard library. Results append to `results/*.jsonl`.
 `selfmodel/sensor.py::_extract` falls back to `reasoning_content`; keep that if
 you point this at a reasoning model.
 
-## The E4 confound — resolved
+## The E4 confound — revisited (see E5b)
 
 The belief tracker's decay (`RHO = 0.97 < 1`) gives the posterior intrinsic
 inertia, so *some* of E4's stickiness is mechanical rather than emergent from the
@@ -99,12 +99,18 @@ SELFMODEL_RHO=1.0 python -m experiments.e4_hysteresis
 
 **This control has now been run.** With `RHO = 1.0` (decay fully off), the loop
 area held at **0.115**, against **0.126** with decay on — essentially unchanged.
-Had the stickiness been mechanical filter inertia, removing the decay would have
-collapsed the loop area toward zero. It did not. The path-dependence therefore
-**survives a memoryless filter**, so it is an emergent property of the closed
-loop (state → reply → sensor → state), not an artefact of the estimator. The
-confound is resolved. (The transition remains *smooth* under both settings — so
-this demonstrates path-dependent memory, not a sharp phase transition.)
+**However, a later control (E5b) shows decay-off was the wrong decisive test.**
+An accumulator that never forgets is path-dependent by construction: rerunning
+the identical protocol with a *state-decoupled* likelihood (no LLM at all)
+still produces loop areas of 0.10–0.15. The loop-attributable memory is the
+*excess* over that null — roughly **+0.06 to +0.08** at every ramp rate (E5),
+which does not shrink as ramps slow, ruling out viscous lag. So: the closed
+loop contributes genuine, rate-independent path-dependence, of modest size —
+about a third of the raw loop area. Whether it amounts to true bistability is
+open pending a long-run two-point basin test (E6). Full revision in
+[`FINDINGS.md`](FINDINGS.md); the null is `experiments/e5b_null.py` and runs in
+seconds with no endpoint. (The transition remains *smooth* under all settings —
+path-dependent memory, not a sharp phase transition.)
 
 ## Credit & license
 
