@@ -17,6 +17,10 @@ loop. It makes **no** claim about the Ψ-threshold, consciousness, or the wider
 Laflamme-3T conjecture; those questions are out of scope and untouched by these
 experiments.
 
+## Paper
+
+A short preprint writing up these experiments is in [paper/](paper/) ([PDF](paper/ac1_replication.pdf), [LaTeX source](paper/ac1_replication.tex)). Submission notes are in [paper/ARXIV_SUBMISSION.md](paper/ARXIV_SUBMISSION.md).
+
 ## The loop
 
 ```

@@ -1,0 +1,257 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+\usepackage{natbib}
+\usepackage{xcolor}
+
+\title{A Controlled Replication of a Self-Model Loop for Language-Model Agents:\\
+Calibration, Causal Attribution, and Closed-Loop Hysteresis}
+
+\author{Grant\thanks{Independent researcher (Franks.Games). Correspondence via the
+project repository.}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A recently described architecture wraps a large language model (LLM) with a
+self-referential inference layer: a Bayesian belief over the agent's own
+interaction ``stance'', re-injected into generation each turn, together with a
+hidden deliberative monologue. The originating write-ups report strong effects
+but do not publish the controls needed to separate the contribution of the state
+\emph{content} from the presence of an instruction, an honest task baseline, or
+the intrinsic inertia of the estimator. We give an independent, clean-room
+reimplementation of the loop and subject four of its claims to those controls.
+We find: (i) under a structured-placebo control, the state's \emph{content} is
+causally load-bearing only when the posterior is confident, and the effect is
+carried most clearly by the hidden monologue; (ii) a clamped factorial confirms
+calibration (the stance predicts the agent's own reply behaviour) and shows the
+``gate'' token to be a minor, non-uniform channel; (iii) on a ground-truth
+hidden-stance task the loop infers at $3\times$ chance but \emph{ties} an honest
+single-shot LLM baseline, so the filter buys persistence rather than accuracy---
+and a bare LLM is far above chance, so reporting chance as the baseline inflates
+the apparent gain; (iv) driving the closed loop with a ramped external push
+produces strong hysteresis (path-dependent memory) but no sharp bistable jump,
+and this hysteresis \emph{survives a decay-free filter} ($\rho=1.0$), showing it
+to be an emergent property of the loop rather than an artefact of the estimator.
+Every claim tested reproduces in a ``true-but-softer'' form once the missing
+controls are added. We make no claim about consciousness or any threshold
+measure; the scope is strictly the loop's measurable behaviour. Code and data
+are released.
+\end{abstract}
+
+\section{Introduction}
+
+Adding a persistent, self-referential state to an LLM agent---a belief about the
+agent's own stance, updated online and fed back into generation---is an
+appealing idea with a growing informal literature. A prominent recent
+instantiation (hereafter ``the AC1 loop'', following its author's naming)
+combines four ingredients: a Bayesian stance tracker; a rendered state
+\emph{prefix} injected upstream of the reply; a hidden \emph{private monologue}
+that deliberates before the public reply; and a second-order term modelling the
+interlocutor. The originating essays report large effects---for example that
+removing the monologue changes the output on 92--100\% of measurable turns---and
+frame these as evidence for strong properties.
+
+Our interest is narrower and purely methodological. Effects of this kind can
+arise for reasons that have nothing to do with a self-model: any prefix that
+contains an imperative will change behaviour; a ``baseline'' set at chance will
+make any above-chance system look impressive; and an estimator with decay will
+look path-dependent whether or not the surrounding loop is. The originating
+write-ups do not report the controls that separate these. This paper supplies
+them, on an independent reimplementation, and reports what survives.
+
+\paragraph{Scope and non-claims.} We study only the measurable behaviour of the
+loop. We make \textbf{no} claim about the Ψ-threshold, consciousness, or the
+wider conjecture the architecture is embedded in; those questions are neither
+tested nor implied here. Where a claim holds we say so; where it holds only in a
+softer form, or rests on an unresolved confound, we say that too.
+
+\section{The loop}
+
+The state is a Dirichlet posterior over five stance modes
+$\{$exploring, evaluating, overwhelmed, asserting, disengaging$\}$. Each turn:
+\begin{enumerate}
+\item a \textbf{sensor} (an LLM classification with confidence) reads the latest
+line and yields a per-mode likelihood $\ell$ and a scalar evidence $e$;
+\item the tracker updates $\alpha \leftarrow \rho\,\alpha + e\,\ell$, with a
+mean-step cap, an $\alpha$ floor, and a concentration cap;
+\item the posterior $p=\alpha/\kappa$ is rendered into a \textbf{prefix} (the
+five values, the dominant mode, a \emph{gate} flag, and an optional per-mode
+\emph{strategy} line);
+\item an optional \textbf{private monologue} is generated from the prefix and
+prepended, unseen, to the reply's system prompt;
+\item the reply is produced; the sensor reads it; the loop repeats.
+\end{enumerate}
+The decay $\rho<1$ gives the posterior finite memory. Our reimplementation is
+standard-library Python against any OpenAI-compatible endpoint; it copies no
+part of the original codebase and is built only from the public descriptions.
+
+\paragraph{A practical note that matters for reproduction.} Some reasoning
+models return their text in a \texttt{reasoning\_content} field with an empty
+\texttt{content}. A sensor reading only \texttt{content} then silently returns
+nothing and the loop degrades \emph{without erroring}. Our extractor falls back
+to \texttt{reasoning\_content}; anyone reproducing this against a reasoning model
+must do the same or measure a broken loop.
+
+\section{Experiments}
+
+All behaviour metrics are ground-truth (word counts, question flags, matches to a
+known hidden label); where a blind label is needed (E1) it is produced by a
+separate model that never sees the prefix. Figures below are from a small number
+of base models and should be read as illustrative in magnitude and indicative in
+direction.
+
+\subsection{E1: structured-placebo ablation}
+Four arms at matched format: \textsc{true} (production prefix), \textsc{scrambled}
+(same posterior with mode labels deranged, dominant and strategy rebuilt so the
+placebo is internally consistent but wrong), \textsc{numbers\_only} (true
+posterior, strategy line stripped), \textsc{null} (no prefix). Under a
+\emph{weakly} held posterior, \textsc{true}${\approx}$\textsc{scrambled} on the
+blind-label channel and \textsc{numbers\_only}${\approx}$\textsc{null} on every
+channel: the imperative \emph{strategy line} carries the visible effect, not the
+state values. Taken alone this is deflationary---the model follows the
+instruction whether the state behind it is true or deranged.
+
+\subsection{E2: clamped factorial}
+Clamping the posterior to each mode in turn (so the design cannot collapse into a
+single mode) and toggling gate, monologue and strategy independently
+(180 cells), we find that under a \emph{strong} clamped posterior:
+\begin{itemize}
+\item the dominant mode \textbf{predicts} reply behaviour (Table~\ref{tab:calib});
+calibration holds;
+\item \textsc{numbers\_only} prefixes now produce long, unshaped replies
+($\sim$150--200 words) that differ sharply from strategy-bearing prefixes
+(46--133 words): the state values are \emph{not} universally inert. This
+\textbf{corrects} the E1 reading---inertness was a weak-state artefact;
+\item the gate token moves length modestly and non-uniformly (some modes
+lengthen, some shorten): a real but minor secondary channel, not the driver;
+\item the monologue sharpens state-consistent behaviour where the state is
+strongest.
+\end{itemize}
+In a companion two-stage variant on a non-reasoning base (so the monologue is the
+only deliberation), \textsc{true}/\textsc{scrambled}/\textsc{null} produced reply
+lengths of $\sim$131/47/79 words---opposite-signed departures from null in the
+state-consistent direction ($t\approx5.2$ for \textsc{true} vs.\ \textsc{scrambled}).
+Chained with the \textsc{numbers\_only}${\approx}$\textsc{null} result, this
+attributes the causal channel to the \textbf{hidden monologue}: it is the step at
+which the state's content becomes behaviourally load-bearing. This reproduces the
+architecture's own ``prefix alone is insufficient'' claim, under a
+structured-placebo control the original does not report.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lrr}
+\toprule
+Clamped mode & mean words & question rate \\
+\midrule
+exploring    & 51.0  & 1.00 \\
+evaluating   & 102.2 & 0.50 \\
+overwhelmed  & 108.0 & 0.83 \\
+asserting    & 46.0  & 0.50 \\
+disengaging  & 133.5 & 0.50 \\
+\bottomrule
+\end{tabular}
+\caption{E2 calibration: clamped dominant mode vs.\ reply behaviour (strategy on,
+monologue off, gate off). The mode predicts style---exploring is short and always
+questions; asserting is short and direct; the deliberative modes run long.}
+\label{tab:calib}
+\end{table}
+
+\subsection{E3: hidden-stance game with an honest baseline}
+Each episode fixes a hidden mode; a simulator writes three short in-mode lines;
+three predictors are scored against ground truth: random, an honest single-shot
+LLM reading the whole transcript, and the sensor+filter loop. Over 30 episodes:
+loop $0.60$, single-shot $0.60$, random $0.233$ (chance $0.20$). The loop infers
+at $3\times$ chance, but it \emph{ties} the honest single-shot baseline: on short
+evidence the filter buys persistence and accumulated state, not raw accuracy. The
+methodological point is that a bare LLM is \emph{not} at chance on this task, so
+reporting a chance-level baseline would inflate the apparent gain of the loop.
+
+\subsection{E4: closed-loop hysteresis, and the decay confound}
+Only this experiment probes dynamics. Closing the loop and applying an external
+push toward \emph{disengaging}, ramped up ($0\to0.9$) then back down
+($0.9\to0$) from the same posterior, we measure the disengaging mass at each
+level (Table~\ref{tab:hyst}). The down-ramp sits far above the up-ramp at every
+level (loop area $0.126$): pushed to disengagement at $0.9$ and released to $0$,
+the state \emph{stays} in the basin. But the up-ramp rises smoothly (max
+single-step jump $0.05$): there is no discontinuous transition. So the loop shows
+strong \textbf{path-dependent memory} but not sharp bistability---softer than a
+first-order phase transition.
+
+\paragraph{The decay confound, and its resolution.} The tracker's decay
+($\rho=0.97<1$) builds intrinsic inertia into the posterior, so some stickiness
+is mechanical rather than emergent. The decisive control is a decay-free rerun.
+With $\rho=1.0$ the loop area held at $0.115$ (vs.\ $0.126$)---essentially
+unchanged (Table~\ref{tab:hyst}). Had the stickiness been filter inertia,
+removing decay would have collapsed the loop area toward zero; it did not.
+The path-dependence therefore \textbf{survives a memoryless filter} and is an
+emergent property of the closed loop, not an artefact of the estimator. The
+transition remains smooth under both settings.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lrrrrrrr}
+\toprule
+push & 0.00 & 0.15 & 0.30 & 0.45 & 0.60 & 0.75 & 0.90 \\
+\midrule
+up ($\rho{=}0.97$)   & .184 & .198 & .249 & .284 & .324 & .364 & .385 \\
+down ($\rho{=}0.97$) & .382 & .405 & .417 & .421 & .419 & .422 & .401 \\
+\midrule
+up ($\rho{=}1.0$)    & .185 & .198 & .241 & .254 & .289 & .323 & .356 \\
+down ($\rho{=}1.0$)  & .368 & .379 & .389 & .383 & .386 & .376 & .370 \\
+\bottomrule
+\end{tabular}
+\caption{E4 disengaging mass along the up/down ramps. Loop area $0.126$
+($\rho{=}0.97$) vs.\ $0.115$ ($\rho{=}1.0$); the hysteresis is essentially
+unchanged with decay removed.}
+\label{tab:hyst}
+\end{table}
+
+\section{Discussion}
+
+Across four controls the picture is consistent: each tested claim reproduces in a
+\emph{true-but-softer} form. The self-state is causally load-bearing on
+behaviour---most clearly through the private monologue, and only once the
+posterior is confident. The loop is calibrated: its state predicts its own reply
+behaviour. Hidden-stance inference works, but against an honest baseline the loop
+contributes persistence rather than accuracy. And the closed loop has genuine,
+emergent path-dependence, confirmed to survive a memoryless filter---though as
+smooth hysteresis, not a sharp transition.
+
+None of this speaks to the stronger claims the architecture is often presented
+with. We measured structural properties of a feedback loop; whether such
+properties bear on any threshold or phenomenal question is outside what these
+experiments can address, and we make no such claim. What we can say is narrower
+and, we think, useful: the loop does several real things, and it does them in a
+milder and better-controlled form than the original presentation asserts.
+
+\paragraph{Limitations.} Figures come from a small number of base models; the
+directions are the finding, not the magnitudes. The blind labeller in E1 has
+limited power on the label channel (the word-count and question-rate channels
+separate more cleanly). E3 uses short (three-line) episodes; longer evidence
+might let the filter's persistence convert into an accuracy gain over the
+single-shot baseline. These are the natural next experiments.
+
+\section*{Reproducibility}
+A clean-room implementation of the loop and all four experiments, with the raw
+result files, is released under the MIT license at the project repository. The
+code uses only the Python standard library and targets any OpenAI-compatible
+endpoint. The decay-free control is a single environment variable
+(\texttt{SELFMODEL\_RHO=1.0}).
+
+\section*{Acknowledgements}
+The self-model loop architecture studied here is due to Lark Laflamme (RavenNest
+Scientific). This is an independent reconstruction and set of controls; it
+reproduces none of the original code and is built from the public descriptions.
+We thank the author for write-ups clear enough to rebuild from.
+
+\end{document}
