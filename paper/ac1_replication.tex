@@ -29,7 +29,8 @@ hidden deliberative monologue. The originating write-ups report strong effects
 but do not publish the controls needed to separate the contribution of the state
 \emph{content} from the presence of an instruction, an honest task baseline, or
 the intrinsic inertia of the estimator. We give an independent, clean-room
-reimplementation of the loop and subject four of its claims to those controls.
+reimplementation of the loop and subject its central claims to those controls
+across seven experiments.
 We find: (i) under a structured-placebo control, the state's \emph{content} is
 causally load-bearing only when the posterior is confident, and the effect is
 carried most clearly by the hidden monologue; (ii) a clamped factorial confirms
@@ -39,9 +40,12 @@ hidden-stance task the loop infers at $3\times$ chance but \emph{ties} an honest
 single-shot LLM baseline, so the filter buys persistence rather than accuracy---
 and a bare LLM is far above chance, so reporting chance as the baseline inflates
 the apparent gain; (iv) driving the closed loop with a ramped external push
-produces strong hysteresis (path-dependent memory) but no sharp bistable jump,
-and this hysteresis \emph{survives a decay-free filter} ($\rho=1.0$), showing it
-to be an emergent property of the loop rather than an artefact of the estimator.
+produces hysteresis (path-dependent memory) but no sharp bistable jump; a
+state-decoupled null run shows that roughly two thirds of the raw loop area is
+accumulator arithmetic, leaving a modest ($\sim$0.07 in loop area),
+rate-independent loop-attributable excess that grows rather than shrinks as the
+ramp slows; and a long-horizon basin test finds a single attractor---initial
+conditions remain visible for over 100 turns, but there is no bistability.
 Every claim tested reproduces in a ``true-but-softer'' form once the missing
 controls are added. We make no claim about consciousness or any threshold
 measure; the scope is strictly the loop's measurable behaviour. Code and data
@@ -64,13 +68,15 @@ frame these as evidence for strong properties.
 Our interest is narrower and purely methodological. Effects of this kind can
 arise for reasons that have nothing to do with a self-model: any prefix that
 contains an imperative will change behaviour; a ``baseline'' set at chance will
-make any above-chance system look impressive; and an estimator with decay will
-look path-dependent whether or not the surrounding loop is. The originating
+make any above-chance system look impressive; and an estimator that accumulates
+evidence will look path-dependent whether or not the surrounding loop is---with
+decay, through inertia; without decay, by construction, since an undecayed
+accumulator never forgets. The originating
 write-ups do not report the controls that separate these. This paper supplies
 them, on an independent reimplementation, and reports what survives.
 
 \paragraph{Scope and non-claims.} We study only the measurable behaviour of the
-loop. We make \textbf{no} claim about the Ψ-threshold, consciousness, or the
+loop. We make \textbf{no} claim about the $\Psi$-threshold, consciousness, or the
 wider conjecture the architecture is embedded in; those questions are neither
 tested nor implied here. Where a claim holds we say so; where it holds only in a
 softer form, or rests on an unresolved confound, we say that too.
@@ -187,15 +193,16 @@ single-step jump $0.05$): there is no discontinuous transition. So the loop show
 strong \textbf{path-dependent memory} but not sharp bistability---softer than a
 first-order phase transition.
 
-\paragraph{The decay confound, and its resolution.} The tracker's decay
-($\rho=0.97<1$) builds intrinsic inertia into the posterior, so some stickiness
-is mechanical rather than emergent. The decisive control is a decay-free rerun.
-With $\rho=1.0$ the loop area held at $0.115$ (vs.\ $0.126$)---essentially
-unchanged (Table~\ref{tab:hyst}). Had the stickiness been filter inertia,
-removing decay would have collapsed the loop area toward zero; it did not.
-The path-dependence therefore \textbf{survives a memoryless filter} and is an
-emergent property of the closed loop, not an artefact of the estimator. The
-transition remains smooth under both settings.
+\paragraph{The decay confound---and why the obvious control is insufficient.}
+The tracker's decay ($\rho=0.97<1$) builds intrinsic inertia into the posterior,
+so some stickiness is mechanical rather than emergent. The natural control is a
+decay-free rerun: with $\rho=1.0$ the loop area held at $0.115$ (vs.\ $0.126$)
+---essentially unchanged (Table~\ref{tab:hyst}), and the transition remains
+smooth under both settings. We initially read this as decisive. It is not: an
+accumulator at $\rho=1.0$ never forgets, so it is path-dependent \emph{by
+construction}, and ``survives decay-off'' cannot distinguish loop-borne memory
+from accumulator arithmetic. Separating the two requires a null that keeps the
+accumulator and removes the loop---which is E5b, below.
 
 \begin{table}[t]
 \centering
@@ -216,16 +223,83 @@ unchanged with decay removed.}
 \label{tab:hyst}
 \end{table}
 
+\subsection{E5--E6: what kind of memory?}
+Three follow-ups decompose the E4 effect. All run at $\rho=1.0$ on a single
+base model, with the push held for $K$ turns per level (E4 corresponds to a
+fast ramp).
+
+\paragraph{E5: ramp-rate sweep.} If the hysteresis were lag---a viscous state
+trailing a moving input---slowing the ramp would collapse the loop area toward
+zero. It does the opposite (Table~\ref{tab:memdecomp}): dwelling longer at each
+level entrenches the state more deeply. The memory is not lag.
+
+\paragraph{E5b: state-decoupled null.} The decisive control. The identical ramp
+protocol is run with a likelihood that ignores the state entirely (no LLM in
+the loop), so any loop area is pure accumulator arithmetic. The null still
+produces areas of $0.10$--$0.15$ with the same growth in $K$
+(Table~\ref{tab:memdecomp}): roughly two thirds of the raw E5 area is the
+estimator, confirming that E4's ``survives decay-off'' framing overstated what
+that rerun showed. The \textbf{loop-attributable memory} is the excess of the
+closed loop over the null: $+0.06$ to $+0.08$ at every $K$, and not shrinking
+as the ramp slows. Real at every rate---but about a third of the raw area.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+turns per level $K$ & 1 & 3 & 6 & 12 \\
+\midrule
+closed loop (E5)          & 0.161 & 0.210 & 0.213 & 0.231 \\
+state-decoupled null (E5b) & 0.101 & 0.135 & 0.142 & 0.153 \\
+\midrule
+loop-attributable excess  & 0.060 & 0.075 & 0.071 & 0.078 \\
+\bottomrule
+\end{tabular}
+\caption{Decomposing the hysteresis ($\rho=1.0$). The null---the same
+accumulator with the loop removed---carries most of the raw area; the
+loop-attributable excess is $\sim$0.07 and rate-independent, growing slightly
+as the ramp slows rather than collapsing as a lag account would predict.}
+\label{tab:memdecomp}
+\end{table}
+
+\paragraph{E6: two-point basin test.} Whether the residual memory amounts to
+true bistability---two attractors at identical input---is tested by starting
+the closed loop from opposite dominant modes under a clamped push of $0.45$.
+At $N=30$ turns the trajectories still held a $\sim$0.20 gap, but the lower
+trajectory was still climbing, so a 30-turn run cannot distinguish two
+attractors from slow convergence to one (the shipped
+\texttt{e6\_bistability.json} verdict, computed at $N=30$, should be
+disregarded for exactly this reason). At $N=100$ the question resolves:
+both trajectories converge on a single attractor ($\sim$0.60--0.66
+disengaging mass), with tail gaps of $0.07$--$0.08$ and still closing.
+\textbf{No bistability.} This also revises E4's ``the state stays in the
+basin'' reading: at long horizon it would not stay; the return is merely slow.
+
+\paragraph{Revised claim.} The closed loop adds modest, genuine memory:
+$\sim$0.07 of loop area beyond accumulator arithmetic, rate-independent, with
+initial-condition effects visible for over 100 turns---under a single
+attractor, with no sharp transition and no bistability. The mechanism is
+loop-amplified stiffening of convergence, not competing basins. Every stronger
+reading tested in this series, including two of our own along the way, failed
+its control.
+
 \section{Discussion}
 
-Across four controls the picture is consistent: each tested claim reproduces in a
-\emph{true-but-softer} form. The self-state is causally load-bearing on
+Across these controls the picture is consistent: each tested claim reproduces in
+a \emph{true-but-softer} form. The self-state is causally load-bearing on
 behaviour---most clearly through the private monologue, and only once the
 posterior is confident. The loop is calibrated: its state predicts its own reply
 behaviour. Hidden-stance inference works, but against an honest baseline the loop
-contributes persistence rather than accuracy. And the closed loop has genuine,
-emergent path-dependence, confirmed to survive a memoryless filter---though as
-smooth hysteresis, not a sharp transition.
+contributes persistence rather than accuracy. And the closed loop adds genuine
+memory beyond its own accumulator---a modest, rate-independent excess over a
+state-decoupled null---under a single attractor: initial conditions stay visible
+for over a hundred turns, but there is no sharp transition and no bistability.
+Two of our own intermediate readings (that a decay-free rerun was the decisive
+confound control, and that a 30-turn basin gap indicated bistability) failed
+their own follow-up controls and are corrected above; we report them because the
+failure mode---an accumulator that is path-dependent by construction, and a
+stability criterion that passes on slow drift---will face anyone reproducing
+this loop.
 
 None of this speaks to the stronger claims the architecture is often presented
 with. We measured structural properties of a feedback loop; whether such
@@ -239,10 +313,13 @@ directions are the finding, not the magnitudes. The blind labeller in E1 has
 limited power on the label channel (the word-count and question-rate channels
 separate more cleanly). E3 uses short (three-line) episodes; longer evidence
 might let the filter's persistence convert into an accuracy gain over the
-single-shot baseline. These are the natural next experiments.
+single-shot baseline. The E5/E5b/E6 memory decomposition comes from a single
+base model and one push geometry; the $\sim$0.07 excess should be read as an
+existence result, not a constant. These are the natural next experiments.
 
 \section*{Reproducibility}
-A clean-room implementation of the loop and all four experiments, with the raw
+A clean-room implementation of the loop and all experiments (E1--E6, including
+the E5b state-decoupled null and the long-horizon E6 rerun), with the raw
 result files, is released under the MIT license at the project repository. The
 code uses only the Python standard library and targets any OpenAI-compatible
 endpoint. The decay-free control is a single environment variable
