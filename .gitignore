@@ -3,3 +3,6 @@ __pycache__/
 results/*.jsonl
 .env
 results/*.log
+
+!results/raw_e4_hysteresis.jsonl
+!results/raw_e4_hysteresis_rho1.jsonl

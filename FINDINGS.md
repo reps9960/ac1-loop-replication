@@ -36,11 +36,11 @@ The correction matters: "bare state numbers are inert" is **not** a general
 truth about the loop — it is an artefact of weak state. Anyone reproducing E1
 without E2 would draw the wrong conclusion.
 
-The clearest causal channel throughout is the **private monologue**. In a
-companion two-stage variant (monologue then reply, on a non-reasoning base so the
-monologue is the only deliberation), true / scrambled / null states produced
-reply lengths of ~131 / ~47 / ~79 words — opposite-signed departures from null in
-the state-consistent direction. Chained with the numbers-only-≈-null result, the
+The clearest causal channel throughout is the **private monologue**. In the
+factorial (e2_factorial.json), turning the monologue on moves replies in the
+state-consistent direction exactly where the state is strongest (disengaging
+133.5 → 30.2 words; overwhelmed 108.0 → 76.0), while weak states barely move.
+Chained with the numbers-only-≈-null result, the
 attribution is clean: **the hidden monologue is the step at which the state's
 content becomes behaviourally load-bearing.** This is exactly the essays' own
 claim that the prefix alone is insufficient without a deliberation step — and it
@@ -84,7 +84,7 @@ external push toward disengagement up then down:
 
 So: **strong path-dependence, no sharp bistability.** The loop has a
 self-reinforcing attractor — the "memory" half of a phase-transition claim,
-demonstrated on live hardware — but the entry is gradual, i.e. softer than a
+demonstrated end-to-end against a live OpenAI-compatible chat endpoint — but the entry is gradual, i.e. softer than a
 first-order transition. A hysteresis loop without a clean jump.
 
 ### The unresolved confound

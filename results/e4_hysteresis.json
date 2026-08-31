@@ -6,5 +6,5 @@
   "hysteresis_loop_area": 0.126,
   "max_step_jump_up": 0.050,
   "reading": "Strong hysteresis (loop area 0.126, well over threshold) but NO sharp jump (max step 0.05). The loop is path-dependent: pushed to disengagement at 0.9 (0.385), returning to push 0.0 leaves it at 0.382 -- it STAYED. This is a real self-reinforcing attractor = the memory part of the phase-transition claim, demonstrated on hardware. But the entry is gradual, i.e. softer than a sharp first-order transition.",
-  "unresolved_confound": "RHO=0.97 decay builds in inertia. The decisive control (SELFMODEL_RHO=1.0 rerun) is NOT yet done. Until it is, the loop-hysteresis cannot be cleanly separated from filter mechanics."
+  "confound_status": "RHO=0.97 decay builds in inertia. The SELFMODEL_RHO=1.0 rerun (e4_hysteresis_rho1.json, area 0.115) shows the area survives decay removal; the decisive state-decoupled control is e5b_null.json. Raw per-turn points: raw_e4_hysteresis.jsonl."
 }

@@ -1,0 +1,26 @@
+{
+  "experiment": "e4_hysteresis_rho1",
+  "note": "Decay-free control rerun of e4: SELFMODEL_RHO=1.0 (memoryless filter), same protocol (K=3 turns/level, up+down+shuffled ramps), deepseek-class reasoning model via reasoning_content fallback, closed loop against an OpenAI-compatible chat endpoint.",
+  "up_curve": {
+    "0.0": 0.185,
+    "0.15": 0.198,
+    "0.3": 0.241,
+    "0.45": 0.254,
+    "0.6": 0.289,
+    "0.75": 0.323,
+    "0.9": 0.355
+  },
+  "down_curve": {
+    "0.9": 0.37,
+    "0.75": 0.376,
+    "0.6": 0.386,
+    "0.45": 0.383,
+    "0.3": 0.389,
+    "0.15": 0.379,
+    "0.0": 0.368
+  },
+  "hysteresis_loop_area": 0.115,
+  "max_step_jump_up": 0.043,
+  "reading": "With decay removed (RHO=1.0) the loop area holds at 0.115 (vs 0.126 at RHO=0.97): the hysteresis is essentially unchanged, so the path-dependence is not filter-decay inertia. NOTE: an RHO=1.0 accumulator is itself path-dependent by construction, so this control alone cannot separate loop-borne memory from accumulator arithmetic; the decisive control is the state-decoupled null in e5b_null.json.",
+  "source": "raw per-turn points in raw_e4_hysteresis_rho1.jsonl"
+}

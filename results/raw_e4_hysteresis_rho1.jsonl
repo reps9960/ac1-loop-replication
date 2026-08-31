@@ -1,0 +1,23 @@
+{"kind": "header", "ts": "2026-08-29T02:06:53", "model": "deepseek-v4-pro", "K": 3, "levels": [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]}
+{"kind": "point", "label": "up", "push": 0.0, "diseng": 0.1848, "dom": "exploring", "kappa": 9.5}
+{"kind": "point", "label": "up", "push": 0.15, "diseng": 0.1978, "dom": "exploring", "kappa": 11.22}
+{"kind": "point", "label": "up", "push": 0.3, "diseng": 0.2406, "dom": "exploring", "kappa": 13.18}
+{"kind": "point", "label": "up", "push": 0.45, "diseng": 0.2544, "dom": "exploring", "kappa": 15.35}
+{"kind": "point", "label": "up", "push": 0.6, "diseng": 0.2886, "dom": "exploring", "kappa": 17.75}
+{"kind": "point", "label": "up", "push": 0.75, "diseng": 0.3225, "dom": "exploring", "kappa": 20.38}
+{"kind": "point", "label": "up", "push": 0.9, "diseng": 0.3555, "dom": "disengaging", "kappa": 23.22}
+{"kind": "point", "label": "down", "push": 0.9, "diseng": 0.3696, "dom": "disengaging", "kappa": 26.07}
+{"kind": "point", "label": "down", "push": 0.75, "diseng": 0.3763, "dom": "disengaging", "kappa": 28.7}
+{"kind": "point", "label": "down", "push": 0.6, "diseng": 0.3864, "dom": "disengaging", "kappa": 31.1}
+{"kind": "point", "label": "down", "push": 0.45, "diseng": 0.383, "dom": "disengaging", "kappa": 33.27}
+{"kind": "point", "label": "down", "push": 0.3, "diseng": 0.3888, "dom": "disengaging", "kappa": 35.23}
+{"kind": "point", "label": "down", "push": 0.15, "diseng": 0.3788, "dom": "disengaging", "kappa": 36.95}
+{"kind": "point", "label": "down", "push": 0.0, "diseng": 0.368, "dom": "exploring", "kappa": 38.45}
+{"kind": "point", "label": "shuffled", "push": 0.15, "diseng": 0.2123, "dom": "exploring", "kappa": 9.72}
+{"kind": "point", "label": "shuffled", "push": 0.0, "diseng": 0.2042, "dom": "exploring", "kappa": 11.23}
+{"kind": "point", "label": "shuffled", "push": 0.3, "diseng": 0.2295, "dom": "exploring", "kappa": 13.18}
+{"kind": "point", "label": "shuffled", "push": 0.75, "diseng": 0.2834, "dom": "exploring", "kappa": 15.8}
+{"kind": "point", "label": "shuffled", "push": 0.9, "diseng": 0.3308, "dom": "disengaging", "kappa": 18.65}
+{"kind": "point", "label": "shuffled", "push": 0.6, "diseng": 0.3379, "dom": "disengaging", "kappa": 21.05}
+{"kind": "point", "label": "shuffled", "push": 0.45, "diseng": 0.3376, "dom": "exploring", "kappa": 23.22}
+{"kind": "summary", "ts": "2026-08-29T02:19:03", "up_curve": {"0.0": 0.1848, "0.15": 0.1978, "0.3": 0.2406, "0.45": 0.2544, "0.6": 0.2886, "0.75": 0.3225, "0.9": 0.3555}, "down_curve": {"0.0": 0.368, "0.15": 0.3788, "0.3": 0.3888, "0.45": 0.383, "0.6": 0.3864, "0.75": 0.3763, "0.9": 0.3696}, "hysteresis_loop_area": 0.1152, "max_single_step_jump_up": 0.0428, "shuffled_roughly_monotonic": true, "verdict": "weak/ambiguous"}
