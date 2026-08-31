@@ -1,5 +1,7 @@
 # A Controlled Replication of the AC1 Self-Model Loop
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22214088.svg)](https://doi.org/10.5281/zenodo.22214088)
+
 An independent, from-scratch reimplementation of the self-model loop described
 in Lark Laflamme's *AC1-LLM / Laflamme-3T* essays (2026), built to test the
 loop's behavioural claims under controls the original write-ups do not report.
@@ -118,6 +120,12 @@ loop-borne memory. Full revision in
 [`FINDINGS.md`](FINDINGS.md); the null is `experiments/e5b_null.py` and runs in
 seconds with no endpoint. (The transition remains *smooth* under all settings —
 path-dependent memory, not a sharp phase transition.)
+
+## Citation
+
+> Wilson, G. (2026). *A Controlled Replication of a Self-Model Loop for Language-Model Agents: Calibration, Causal Attribution, and Closed-Loop Hysteresis*. Zenodo. https://doi.org/10.5281/zenodo.22214088
+
+A `CITATION.cff` is included; GitHub's “Cite this repository” button uses it.
 
 ## Credit & license
 
