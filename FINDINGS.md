@@ -1,5 +1,7 @@
 # Findings
 
+> **Revision note (v1.1, Sept 2026).** After an external validity review the paper's headline wording was corrected; this file keeps the original narrative but the following should be read with the corrections in mind: E2 is **30 configurations / 180 replies** (a partial factorial, strategy-off×monologue-on absent), not "180 cells"; the "numbers-only" control still carried mode names, values, the Dominant/gate fields and the "internal stance" framing and is renamed **strategy-stripped**; the gate channel is **substantial** (disengaging 133.5→56, asserting 46→78), not minor; "loop area" is the **mean vertical separation** across seven sampled levels (trapezoidal area 0.116 vs 0.126); "calibration" is mode-conditioned style measured with the strategy instruction on, not a probabilistic calibration test; E5 shows **no collapse for K≤12**, which does not rule out slow lag (E6 relaxes for >100 turns); E6 shows **no evidence of bistability in one configuration**, not a single attractor; the ~0.07 residual is an arithmetic difference against an unmatched null; the deposited E1 summary comes from an unreleased weak-clamp variant and is not reproducible from the released `e1_placebo.py`. See the paper's Revision history.
+
 A longer, honest narrative of what this replication found. The short version is
 in the README table; this file records the reasoning, the corrections we made to
 our own earlier conclusions, and the limitations.

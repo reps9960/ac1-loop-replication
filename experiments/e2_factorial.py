@@ -112,7 +112,7 @@ def main():
     strat_effect = {m: {"numbers_only": words(mode=m, strat=False, mono=False, gate=False),
                         "with_strategy": words(mode=m, strat=True, mono=False, gate=False)} for m in MODES}
 
-    summary = {"kind": "summary", "n_cells": len(rows),
+    summary = {"kind": "summary", "n_replies": len(rows), "n_configs": len(cells),
                "calibration": calib, "gate_effect": gate_effect,
                "monologue_effect": mono_effect, "strategy_effect": strat_effect}
     with open(OUT, "a") as f:

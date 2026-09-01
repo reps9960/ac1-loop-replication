@@ -47,9 +47,9 @@ state p  ──►  prefix  ──►  reply  ──►  sensor reads the reply 
 | # | Tests | Result |
 |---|-------|--------|
 | **E1** placebo | Is the *content* of the state causal, or just the presence of a prefix / an embedded instruction? | Under a **weak** posterior: TRUE ≈ SCRAMBLED, NUMBERS_ONLY ≈ NULL. The strategy *line* carries the visible effect, not the numbers — at low confidence. |
-| **E2** factorial | State × gate × monologue × strategy, clamped to each mode. Calibration + confound isolation. | Under a **strong** clamped posterior the mode **predicts** reply behaviour (calibration holds). Strategy line disciplines strongly; gate token is a minor, non-uniform channel; monologue sharpens state-consistent behaviour. **Corrects E1**: bare state numbers are *not* universally inert — that was a weak-state artefact. |
+| **E2** factorial | State × gate × monologue × strategy, clamped to each mode. Calibration + confound isolation. | Under a **strong** clamped posterior the mode **predicts** reply behaviour (mode-conditioned style; measured with the strategy line on). Strategy line disciplines strongly; gate token is a substantial, non-uniform channel; monologue sharpens state-consistent behaviour. **Corrects E1**: bare state numbers are *not* universally inert — that was a weak-state artefact. |
 | **E3** modegame | Hidden-mode inference vs **honest** baselines, ground-truth scored. | Loop **0.60**, honest single-shot LLM **0.60**, random **0.233** (chance 0.20). The loop infers a hidden mode at 3× chance; it *ties* the honest baseline, so on short evidence the filter buys persistence, not raw accuracy. A bare LLM is **not** at chance here. |
-| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong hysteresis** (loop area 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **Confound revisited**: survives a decay-free (ρ=1.0) rerun, but see the E5b null below — the loop-attributable share is ~a third of this area. |
+| **E4** hysteresis | The "phase transition" claim, on the live closed loop. | **Strong path dependence** (mean separation 0.126) but **no sharp jump** (max step 0.05). The state stays in the disengagement basin after the push is removed — real path-dependent memory — but the entry is gradual. Softer than a sharp first-order transition. **Confound revisited**: survives a decay-free (ρ=1.0) rerun, but see the E5b null below — the loop-attributable share is ~a third of this area. |
 
 Full numbers with per-run notes are in [`results/`](results/); the narrative is
 in [`FINDINGS.md`](FINDINGS.md).
@@ -111,9 +111,9 @@ the identical protocol with a *state-decoupled* likelihood (no LLM at all)
 still produces loop areas of 0.10–0.15. The loop-attributable memory is the
 *excess* over that null — roughly **+0.06 to +0.08** at every ramp rate (E5),
 which does not shrink as ramps slow, ruling out viscous lag. So: the closed
-loop contributes genuine, rate-independent path-dependence, of modest size —
+loop residual (~0.07, an arithmetic difference against an unmatched null) did not collapse for K≤12 —
 about a third of the raw loop area. The long-run two-point basin test (E6,
-N=100) resolved the remaining question: **monostable** — one attractor, with
+N=100) found **no evidence of bistability** in one configuration (still relaxing at turn 100), with
 initial conditions visible for 100+ turns before slow convergence. No
 bistability, no sharp transition; modest, genuine, precisely-bounded
 loop-borne memory. Full revision in
@@ -123,7 +123,7 @@ path-dependent memory, not a sharp phase transition.)
 
 ## Citation
 
-> Wilson, G. (2026). *A Controlled Replication of a Self-Model Loop for Language-Model Agents: Calibration, Causal Attribution, and Closed-Loop Hysteresis*. Zenodo. https://doi.org/10.5281/zenodo.22214088
+> Wilson, G. (2026). *A Controlled Replication of a Self-Model Loop for Language-Model Agents: Controls, Confounds, and Finite-Horizon Path Dependence* (v1.1). Zenodo. https://doi.org/10.5281/zenodo.22214088
 
 A `CITATION.cff` is included; GitHub's “Cite this repository” button uses it.
 

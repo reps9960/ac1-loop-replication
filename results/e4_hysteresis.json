@@ -1,10 +1,27 @@
 {
   "experiment": "e4_hysteresis",
   "note": "Closed loop, deepseek-class reasoning model via reasoning_content fallback, K=3 turns/level, up+down+shuffled ramps. RHO=0.97 (default decay).",
-  "up_curve": {"0.0": 0.184, "0.15": 0.198, "0.3": 0.249, "0.45": 0.284, "0.6": 0.324, "0.75": 0.364, "0.9": 0.385},
-  "down_curve": {"0.9": 0.401, "0.75": 0.422, "0.6": 0.419, "0.45": 0.421, "0.3": 0.417, "0.15": 0.405, "0.0": 0.382},
+  "up_curve": {
+    "0.0": 0.184,
+    "0.15": 0.198,
+    "0.3": 0.249,
+    "0.45": 0.284,
+    "0.6": 0.324,
+    "0.75": 0.364,
+    "0.9": 0.385
+  },
+  "down_curve": {
+    "0.9": 0.401,
+    "0.75": 0.422,
+    "0.6": 0.419,
+    "0.45": 0.421,
+    "0.3": 0.417,
+    "0.15": 0.405,
+    "0.0": 0.382
+  },
   "hysteresis_loop_area": 0.126,
-  "max_step_jump_up": 0.050,
+  "max_step_jump_up": 0.05,
   "reading": "Strong hysteresis (loop area 0.126, well over threshold) but NO sharp jump (max step 0.05). The loop is path-dependent: pushed to disengagement at 0.9 (0.385), returning to push 0.0 leaves it at 0.382 -- it STAYED. This is a real self-reinforcing attractor = the memory part of the phase-transition claim, demonstrated on hardware. But the entry is gradual, i.e. softer than a sharp first-order transition.",
-  "confound_status": "RHO=0.97 decay builds in inertia. The SELFMODEL_RHO=1.0 rerun (e4_hysteresis_rho1.json, area 0.115) shows the area survives decay removal; the decisive state-decoupled control is e5b_null.json. Raw per-turn points: raw_e4_hysteresis.jsonl."
+  "confound_status": "RHO=0.97 decay builds in inertia. The SELFMODEL_RHO=1.0 rerun (e4_hysteresis_rho1.json, area 0.115) shows the area survives decay removal; the decisive state-decoupled control is e5b_null.json. Raw per-turn points: raw_e4_hysteresis.jsonl.",
+  "metric_note": "hysteresis_loop_area is the MEAN VERTICAL SEPARATION (down minus up) across the seven sampled push levels, not a geometric area. Trapezoidal geometric area over push 0..0.9 is 0.116 for rho=0.97. Single stochastic trajectory per curve (temperature 0.7), no repetitions/CIs. The push is added directly to the sensor likelihood (2.5*push on the disengaging component), i.e. the estimator is driven numerically. Replies are generated from the state prefix only; the private monologue is not called in E4-E6."
 }

@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "A Controlled Replication of a Self-Model Loop for Language-Model Agents: Calibration, Causal Attribution, and Closed-Loop Hysteresis"
+title: "A Controlled Replication of a Self-Model Loop for Language-Model Agents: Controls, Confounds, and Finite-Horizon Path Dependence"
 type: software
 authors:
   - family-names: Wilson
@@ -13,7 +13,7 @@ repository-code: "https://github.com/reps9960/ac1-loop-replication"
 doi: 10.5281/zenodo.22214088
 preferred-citation:
   type: article
-  title: "A Controlled Replication of a Self-Model Loop for Language-Model Agents: Calibration, Causal Attribution, and Closed-Loop Hysteresis"
+  title: "A Controlled Replication of a Self-Model Loop for Language-Model Agents: Controls, Confounds, and Finite-Horizon Path Dependence"
   authors:
     - family-names: Wilson
       given-names: Grant

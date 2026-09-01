@@ -11,7 +11,8 @@
 \usepackage{xcolor}
 
 \title{A Controlled Replication of a Self-Model Loop for Language-Model Agents:\\
-Calibration, Causal Attribution, and Closed-Loop Hysteresis}
+Controls, Confounds, and Finite-Horizon Path Dependence\\
+{\large Version 1.1 --- revised after external review}}
 
 \author{Grant Wilson\thanks{Independent researcher. Correspondence via the
 project repository.}}
@@ -28,28 +29,35 @@ interaction ``stance'', re-injected into generation each turn, together with a
 hidden deliberative monologue. The originating write-ups report strong effects
 but do not publish the controls needed to separate the contribution of the state
 \emph{content} from the presence of an instruction, an honest task baseline, or
-the intrinsic inertia of the estimator. We give an independent, clean-room
-reimplementation of the loop and subject its central claims to those controls
-across seven experiments.
-We find: (i) under a structured-placebo control, the state's \emph{content} is
-causally load-bearing only when the posterior is confident, and the effect is
-carried most clearly by the hidden monologue; (ii) a clamped factorial confirms
-calibration (the stance predicts the agent's own reply behaviour) and shows the
-``gate'' token to be a minor, non-uniform channel; (iii) on a ground-truth
-hidden-stance task the loop infers at $3\times$ chance but \emph{ties} an honest
-single-shot LLM baseline, so the filter buys persistence rather than accuracy---
-and a bare LLM is far above chance, so reporting chance as the baseline inflates
-the apparent gain; (iv) driving the closed loop with a ramped external push
-produces hysteresis (path-dependent memory) but no sharp bistable jump; a
-state-decoupled null run shows that roughly two thirds of the raw loop area is
-accumulator arithmetic, leaving a modest ($\sim$0.07 in loop area),
-rate-independent loop-attributable excess that grows rather than shrinks as the
-ramp slows; and a long-horizon basin test finds a single attractor---initial
-conditions remain visible for over 100 turns, but there is no bistability.
+the intrinsic inertia of the estimator. We give an independent, clean-room reimplementation of the loop's core (stance
+tracker, state prefix, optional private monologue) and subject its central
+claims to those controls across seven small experiments on one or a few model
+endpoints.
+We find: (i) under a structured-placebo control the state's \emph{content} is
+behaviourally load-bearing only when the posterior is confident, and the private
+monologue is the strongest single factor---though without a matched text-length
+placebo we cannot isolate it as the unique causal channel; (ii) a clamped partial
+factorial shows that mode-labelled prefixes reliably condition reply length and
+question use (an instruction-following result, not a probabilistic calibration
+test) and that the ``gate'' token is a substantial, non-uniform channel rather
+than a minor one; (iii) on a ground-truth hidden-stance task the loop infers well
+above chance (18/30; $p\approx2\times10^{-6}$) but shows no accuracy advantage
+over an honest single-shot LLM baseline, which is itself far above chance; (iv)
+driving the closed loop with a ramped numerical push produces substantial
+finite-horizon path dependence with no observed sharp jump across seven sampled
+levels; a state-decoupled null shows roughly two thirds of the raw separation is
+accumulator arithmetic, leaving an arithmetic residual of $\sim$0.07 (mean
+vertical separation) whose size and mechanism we do not claim to have
+statistically identified; that residual did not collapse for dwell times up to
+12 turns per level, but a 100-turn basin test shows relaxation still under way,
+so slow lag is not excluded; and the basin test found trajectories from opposite
+initial states converging and still closing at turn 100---no evidence of
+bistability in this limited test, not a demonstration of a single attractor.
 Every claim tested reproduces in a ``true-but-softer'' form once the missing
-controls are added. We make no claim about consciousness or any threshold
-measure; the scope is strictly the loop's measurable behaviour. Code and data
-are released.
+controls are added, and several of our own stronger intermediate readings failed
+later controls. We make no claim about consciousness or any threshold measure;
+the scope is strictly the loop's measurable behaviour. Code and data are
+released. This is a preprint, not a peer-reviewed result.
 \end{abstract}
 
 \section{Introduction}
@@ -119,40 +127,73 @@ direction.
 \subsection{E1: structured-placebo ablation}
 Four arms at matched format: \textsc{true} (production prefix), \textsc{scrambled}
 (same posterior with mode labels deranged, dominant and strategy rebuilt so the
-placebo is internally consistent but wrong), \textsc{numbers\_only} (true
-posterior, strategy line stripped), \textsc{null} (no prefix). Under a
-\emph{weakly} held posterior, \textsc{true}${\approx}$\textsc{scrambled} on the
-blind-label channel and \textsc{numbers\_only}${\approx}$\textsc{null} on every
-channel: the imperative \emph{strategy line} carries the visible effect, not the
-state values. Taken alone this is deflationary---the model follows the
-instruction whether the state behind it is true or deranged.
+placebo is internally consistent but wrong), \textsc{strategy\_stripped} (true
+posterior with the strategy line removed; note it still carries the mode names
+and values, the \texttt{Dominant}/\texttt{gate} fields and the ``internal
+stance'' framing, so it is \emph{not} a pure numeric control---earlier versions
+called it \textsc{numbers\_only}, which overstated what was stripped), and
+\textsc{null} (no prefix). Under a \emph{weakly} held posterior,
+\textsc{true} and \textsc{scrambled} were not separable on the blind-label
+channel (JSD $0.007$ bits against a one-off split-half noise floor of $0.109$;
+no formal equivalence test), although they differ visibly on length ($67.5$ vs
+$46.3$ words), and \textsc{strategy\_stripped}${\approx}$\textsc{null}: the
+imperative \emph{strategy line} carried the visible effect, not the state
+values. Taken alone this is deflationary---the model follows the instruction
+whether the state behind it is true or deranged. Scrambling also changes the
+dominant label, gate text and strategy line together, so it does not isolate a
+single content factor.
+
+\paragraph{Reproducibility caveat.} The deposited E1 summary was produced by an
+earlier variant of the script with a weakly held posterior; that variant's exact
+posterior, generated replies and blind-judge outputs were not retained. The
+released \texttt{e1\_placebo.py} clamps the dominant mode at $0.72$ and does not
+reproduce the deposited E1 figures. E1 should therefore be read as illustrative;
+the strong-state result rests on E2, which is reproducible from the released
+code.
 
 \subsection{E2: clamped factorial}
 Clamping the posterior to each mode in turn (so the design cannot collapse into a
-single mode) and toggling gate, monologue and strategy independently
-(180 cells), we find that under a \emph{strong} clamped posterior:
+single mode) and toggling gate, monologue and strategy, we ran 30
+configurations: 5 modes $\times$ gate $\times$ monologue with the strategy line
+(20) plus 10 strategy-stripped configurations with the monologue off; each
+configuration received 2 prompts $\times$ 3 repetitions, i.e.\ 180 replies in
+total (an earlier version of this paper wrote ``180 cells''; that counted
+replies, not configurations). The design is a \emph{partial} factorial: the
+strategy-off\,$\times$\,monologue-on combination was not run, so the
+strategy\,$\times$\,monologue interaction is not estimable. Note also that
+``gate off'' inserts \texttt{gate=full scope} rather than omitting the field,
+and the monologue condition appends the imperative ``Act on that assessment''
+as well as the monologue text. Under a \emph{strong} clamped posterior:
 \begin{itemize}
-\item the dominant mode \textbf{predicts} reply behaviour (Table~\ref{tab:calib});
-calibration holds;
-\item \textsc{numbers\_only} prefixes now produce long, unshaped replies
+\item the dominant mode \textbf{predicts} reply behaviour (Table~\ref{tab:calib}).
+This is measured with the strategy instruction \emph{on}, so it is largely
+instruction following by construction; it is a mode-conditioned-style result,
+not a probabilistic calibration test (no reliability curve, Brier or log-loss),
+and we no longer call it ``calibration'';
+\item \textsc{strategy\_stripped} prefixes now produce long, unshaped replies
 ($\sim$150--200 words) that differ sharply from strategy-bearing prefixes
 (46--133 words): the state values are \emph{not} universally inert. This
 \textbf{corrects} the E1 reading---inertness was a weak-state artefact;
-\item the gate token moves length modestly and non-uniformly (some modes
-lengthen, some shorten): a real but minor secondary channel, not the driver;
-\item the monologue sharpens state-consistent behaviour where the state is
-strongest.
+\item the gate token moves length \emph{substantially} and non-uniformly:
+disengaging $133.5\to56.0$ words ($-58\%$), asserting $46.0\to78.0$ ($+70\%$),
+overwhelmed $108.0\to137.0$ ($+27\%$), six replies per mean. An earlier version
+called this channel ``minor''; the data do not support that;
+\item the monologue shortens the two longest states (disengaging
+$133.5\to30.2$, overwhelmed $108.0\to76.0$) but \emph{lengthens} asserting
+($46.0\to65.5$) despite the asserting strategy asking for one action and stop:
+the effect is selective, not uniformly state-consistent.
 \end{itemize}
-The monologue factor of the factorial makes the channel explicit: with the
-monologue on, replies move in the state-consistent direction precisely where the
-clamped state is strongest (disengaging $133.5\to30.2$ words; overwhelmed
-$108.0\to76.0$), while weak states barely move
-(\texttt{e2\_factorial.json}). Chained with the
-\textsc{numbers\_only}${\approx}$\textsc{null} result, this
-attributes the causal channel to the \textbf{hidden monologue}: it is the step at
-which the state's content becomes behaviourally load-bearing. This reproduces the
-architecture's own ``prefix alone is insufficient'' claim, under a
-structured-placebo control the original does not report.
+The monologue is the strongest single factor in the factorial where the
+clamped state is strongest (\texttt{e2\_factorial.json}). We stop short of
+naming it the identified causal channel: the monologue condition also adds
+text and an imperative, and we ran no matched placebo---equal-length irrelevant
+text, a monologue generated from a scrambled state, the same monologue without
+``Act on that assessment'', or monologues replayed across states. Without
+those, the observed change could reflect extra instruction, semantic priming or
+generic elaboration rather than processing of a valid self-state. The
+originating write-ups claim the monologue is causally upstream; our data are
+consistent with that but do not establish it. It is the leading candidate, not
+a clean identification.
 
 \begin{table}[t]
 \centering
@@ -167,9 +208,11 @@ asserting    & 46.0  & 0.50 \\
 disengaging  & 133.5 & 0.50 \\
 \bottomrule
 \end{tabular}
-\caption{E2 calibration: clamped dominant mode vs.\ reply behaviour (strategy on,
-monologue off, gate off). The mode predicts style---exploring is short and always
-questions; asserting is short and direct; the deliberative modes run long.}
+\caption{E2 mode-conditioned reply style: clamped dominant mode vs.\ reply
+behaviour (strategy on, monologue off, gate off; six replies per row). The mode
+predicts style---exploring is short and always questions; asserting is short
+and direct; the deliberative modes run long. Because the strategy instruction
+is on, much of this is instruction following.}
 \label{tab:calib}
 \end{table}
 
@@ -177,27 +220,47 @@ questions; asserting is short and direct; the deliberative modes run long.}
 Each episode fixes a hidden mode; a simulator writes three short in-mode lines;
 three predictors are scored against ground truth: random, an honest single-shot
 LLM reading the whole transcript, and the sensor+filter loop. Over 30 episodes:
-loop $0.60$, single-shot $0.60$, random $0.233$ (chance $0.20$). The loop infers
-at $3\times$ chance, but it \emph{ties} the honest single-shot baseline: on short
-evidence the filter buys persistence and accumulated state, not raw accuracy. The
-methodological point is that a bare LLM is \emph{not} at chance on this task, so
-reporting a chance-level baseline would inflate the apparent gain of the loop.
+loop $0.60$ (18/30), single-shot $0.60$ (18/30), random $0.233$ (chance
+$0.20$). Against fixed chance the loop is clearly above it (one-sided binomial
+$p\approx1.8\times10^{-6}$), though the 95\% interval on $0.60$ is wide
+(0.42--0.75). It shows no accuracy advantage over the honest single-shot
+baseline; equal point estimates do not establish equivalence, and this design
+does not measure persistence (that would need noisy, conflicting or time-varying
+evidence), so ``the filter buys persistence rather than accuracy'' is a
+hypothesis, not a finding of E3. The task is synthetic (an LLM told the mode
+writes three lines; a classifier with closely related definitions labels them;
+simulator, sensor and baseline default to the same base model), and the ``loop''
+here is the per-line classifier plus accumulator, without the prefix-feedback
+or monologue. The methodological point stands: a bare LLM is \emph{not} at
+chance on this task, so reporting a chance-level baseline would inflate the
+apparent gain of the loop.
 
 \subsection{E4: closed-loop hysteresis, and the decay confound}
 Only this experiment probes dynamics. Closing the loop and applying an external
 push toward \emph{disengaging}, ramped up ($0\to0.9$) then back down
 ($0.9\to0$) from the same posterior, we measure the disengaging mass at each
 level (Table~\ref{tab:hyst}). The down-ramp sits far above the up-ramp at every
-level (loop area $0.126$): pushed to disengagement at $0.9$ and released to $0$,
-the state \emph{stays} in the basin. But the up-ramp rises smoothly (max
-single-step jump $0.05$): there is no discontinuous transition. So the loop shows
-strong \textbf{path-dependent memory} but not sharp bistability---softer than a
-first-order phase transition.
+level: the mean vertical separation across the seven sampled levels is $0.126$
+(the result files call this \texttt{hysteresis\_loop\_area}; it is a fixed-grid
+mean gap, not a geometric area---the trapezoidal area over push $0$--$0.9$ is
+$0.116$). Pushed to disengagement at $0.9$ and released to $0$, the state
+remains elevated over this horizon. The up-ramp rises smoothly (max single-step
+jump $0.05$): no large jump is observed between the seven sampled levels, which
+does not exclude a transition between them. Three design facts bound the
+reading. The ``push'' is not an observation shown to the LLM: the code adds
+$2.5\times$push to the disengaging component of the sensor likelihood, so the
+estimator is driven numerically and history dependence in an accumulating
+estimator is expected. Each curve is a single stochastic trajectory (sampling
+temperature $0.7$) without repetitions or confidence intervals. And E4--E6
+generate replies from the state prefix alone; they do not call the private
+monologue, so the dynamics do not exercise the full architecture. So the loop
+shows substantial \textbf{finite-horizon path dependence} but no observed sharp
+transition.
 
 \paragraph{The decay confound---and why the obvious control is insufficient.}
 The tracker's decay ($\rho=0.97<1$) builds intrinsic inertia into the posterior,
 so some stickiness is mechanical rather than emergent. The natural control is a
-decay-free rerun: with $\rho=1.0$ the loop area held at $0.115$ (vs.\ $0.126$)
+decay-free rerun: with $\rho=1.0$ the mean separation held at $0.115$ (vs.\ $0.126$)
 ---essentially unchanged (Table~\ref{tab:hyst}), and the transition remains
 smooth under both settings. We initially read this as decisive. It is not: an
 accumulator at $\rho=1.0$ never forgets, so it is path-dependent \emph{by
@@ -218,9 +281,9 @@ up ($\rho{=}1.0$)    & .185 & .198 & .241 & .254 & .289 & .323 & .356 \\
 down ($\rho{=}1.0$)  & .368 & .379 & .389 & .383 & .386 & .376 & .370 \\
 \bottomrule
 \end{tabular}
-\caption{E4 disengaging mass along the up/down ramps. Loop area $0.126$
-($\rho{=}0.97$) vs.\ $0.115$ ($\rho{=}1.0$); the hysteresis is essentially
-unchanged with decay removed.}
+\caption{E4 disengaging mass along the up/down ramps (one trajectory each).
+Mean vertical separation $0.126$ ($\rho{=}0.97$) vs.\ $0.115$ ($\rho{=}1.0$);
+the separation is essentially unchanged with decay removed.}
 \label{tab:hyst}
 \end{table}
 
@@ -229,20 +292,31 @@ Three follow-ups decompose the E4 effect. All run at $\rho=1.0$ on a single
 base model, with the push held for $K$ turns per level (E4 corresponds to a
 fast ramp).
 
-\paragraph{E5: ramp-rate sweep.} If the hysteresis were lag---a viscous state
-trailing a moving input---slowing the ramp would collapse the loop area toward
-zero. It does the opposite (Table~\ref{tab:memdecomp}): dwelling longer at each
-level entrenches the state more deeply. The memory is not lag.
+\paragraph{E5: ramp-rate sweep.} If the path dependence were lag---a viscous
+state trailing a moving input---slowing the ramp far enough would collapse the
+separation. Over $K=1,3,6,12$ turns per level it did not shrink
+(Table~\ref{tab:memdecomp}). That is the supportable statement: \emph{no collapse
+was observed for dwell times up to 12 turns per level}. It does not rule out
+lag. E6 shows relaxation still under way after 100 turns, so $K\le12$ is far
+from the quasi-static limit and the E5 pattern is compatible with very slow
+convergence. Increasing $K$ also increases the total evidence delivered at each
+level and, at larger $K$, reaches the estimator's concentration cap, so dwell
+time and evidence dose are confounded in this sweep.
 
 \paragraph{E5b: state-decoupled null.} The decisive control. The identical ramp
 protocol is run with a likelihood that ignores the state entirely (no LLM in
 the loop), so any loop area is pure accumulator arithmetic. The null still
 produces areas of $0.10$--$0.15$ with the same growth in $K$
-(Table~\ref{tab:memdecomp}): roughly two thirds of the raw E5 area is the
-estimator, confirming that E4's ``survives decay-off'' framing overstated what
-that rerun showed. The \textbf{loop-attributable memory} is the excess of the
-closed loop over the null: $+0.06$ to $+0.08$ at every $K$, and not shrinking
-as the ramp slows. Real at every rate---but about a third of the raw area.
+(Table~\ref{tab:memdecomp}): roughly two thirds of the raw E5 separation is
+the estimator, confirming that E4's ``survives decay-off'' framing overstated
+what that rerun showed. The closed-loop-minus-null residual is $+0.06$ to
+$+0.08$ at each $K$ and did not shrink over this range. We report it as an
+arithmetic residual, not a statistically identified causal effect: the null is
+deterministic and not matched to the closed loop's mode and confidence
+distribution, temporal correlation or API noise, and there is a single
+closed-loop realisation per $K$ with no uncertainty estimate. A matched control
+would preserve the real sensor outputs and break only the feedback
+(replaying or permuting state-to-reply pairings) across many seeds.
 
 \begin{table}[t]
 \centering
@@ -256,10 +330,11 @@ state-decoupled null (E5b) & 0.101 & 0.135 & 0.142 & 0.153 \\
 loop-attributable excess  & 0.060 & 0.075 & 0.071 & 0.078 \\
 \bottomrule
 \end{tabular}
-\caption{Decomposing the hysteresis ($\rho=1.0$). The null---the same
-accumulator with the loop removed---carries most of the raw area; the
-loop-attributable excess is $\sim$0.07 and rate-independent, growing slightly
-as the ramp slows rather than collapsing as a lag account would predict.}
+\caption{Decomposing the path dependence ($\rho=1.0$; mean vertical
+separation, one closed-loop trajectory per $K$). The null---the same accumulator
+with the loop removed---carries most of the raw separation; the residual is
+$\sim$0.07 at each $K$ and did not collapse over $K\le12$. It is an arithmetic
+difference against an unmatched null, not a measured causal constant.}
 \label{tab:memdecomp}
 \end{table}
 
@@ -270,31 +345,39 @@ At $N=30$ turns the trajectories still held a $\sim$0.20 gap, but the lower
 trajectory was still climbing, so a 30-turn run cannot distinguish two
 attractors from slow convergence to one (the shipped
 \texttt{e6\_bistability.json} verdict, computed at $N=30$, should be
-disregarded for exactly this reason). At $N=100$ the question resolves:
-both trajectories converge on a single attractor ($\sim$0.60--0.66
-disengaging mass), with tail gaps of $0.07$--$0.08$ and still closing.
-\textbf{No bistability.} This also revises E4's ``the state stays in the
-basin'' reading: at long horizon it would not stay; the return is merely slow.
+disregarded for exactly this reason). At $N=100$ the trajectories approach
+each other ($\sim$0.60 vs $\sim$0.66 disengaging mass), with tail gaps of
+$0.07$--$0.08$ and the lower trajectory still rising. This is consistent with
+convergence to a common attractor but the run stops before convergence, and it
+tests one push value, two initial states, one model and two trajectory pairs.
+The supportable statement is \textbf{no evidence of bistability in this limited
+test}, not that the system has a single attractor. It does revise E4's ``the
+state stays in the basin'' reading: over a long horizon the state does not stay;
+the return is slow.
 
-\paragraph{Revised claim.} The closed loop adds modest, genuine memory:
-$\sim$0.07 of loop area beyond accumulator arithmetic, rate-independent, with
-initial-condition effects visible for over 100 turns---under a single
-attractor, with no sharp transition and no bistability. The mechanism is
-loop-amplified stiffening of convergence, not competing basins. Every stronger
+\paragraph{Revised claim.} Under a cyclic numerical drive the closed loop
+shows substantial finite-horizon path dependence, most of which is accumulator
+arithmetic. A residual of $\sim$0.07 (mean separation) remains over an
+unmatched null and did not collapse for dwell times up to 12 turns per level;
+its size, mechanism and rate dependence are not established. Initial-condition
+effects remain visible for over 100 turns with relaxation still under way, and
+no bistability was observed in the one configuration tested. Every stronger
 reading tested in this series, including two of our own along the way, failed
 its control.
 
 \section{Discussion}
 
 Across these controls the picture is consistent: each tested claim reproduces in
-a \emph{true-but-softer} form. The self-state is causally load-bearing on
-behaviour---most clearly through the private monologue, and only once the
-posterior is confident. The loop is calibrated: its state predicts its own reply
-behaviour. Hidden-stance inference works, but against an honest baseline the loop
-contributes persistence rather than accuracy. And the closed loop adds genuine
-memory beyond its own accumulator---a modest, rate-independent excess over a
-state-decoupled null---under a single attractor: initial conditions stay visible
-for over a hundred turns, but there is no sharp transition and no bistability.
+a \emph{true-but-softer} form. In small synthetic experiments on one or a few
+model endpoints, explicit mode-labelled prompt additions changed output length
+and question use, most strongly when the posterior was confident and with the
+private monologue as the leading---but not isolated---factor. A
+classifier-plus-accumulator inferred synthetic modes well above chance without
+an accuracy advantage over an honest single-shot baseline. Under a cyclic
+numerical drive the closed loop produced substantial finite-horizon path
+dependence, most of it accumulator arithmetic, with the size and mechanism of
+any additional feedback contribution left uncertain; a 100-turn basin test found
+no bistability and relaxation still in progress.
 Two of our own intermediate readings (that a decay-free rerun was the decisive
 confound control, and that a 30-turn basin gap indicated bistability) failed
 their own follow-up controls and are corrected above; we report them because the
@@ -315,8 +398,36 @@ limited power on the label channel (the word-count and question-rate channels
 separate more cleanly). E3 uses short (three-line) episodes; longer evidence
 might let the filter's persistence convert into an accuracy gain over the
 single-shot baseline. The E5/E5b/E6 memory decomposition comes from a single
-base model and one push geometry; the $\sim$0.07 excess should be read as an
-existence result, not a constant. These are the natural next experiments.
+base model and one push geometry, from single stochastic trajectories without
+repetition or confidence intervals; the $\sim$0.07 residual is an arithmetic
+difference against an unmatched null and should not be read as a constant or as
+an identified causal effect. E4--E6 do not exercise the private monologue. The
+E2 factorial is partial and its controls are imperfectly named (see E1, E2).
+The deposited E1 summary is not reproducible from the released E1 script. The
+implementation is a conceptual partial reimplementation: it reconstructs the
+stance tracker, state prefix and monologue from public descriptions but not the
+second-order interlocutor term or the error-corrector component the originating
+account describes, and the original code was unavailable for comparison, so
+architectural fidelity is not verified. Matched placebos for the monologue, a
+complete factorial, many seeds with uncertainty estimates, genuinely
+probabilistic calibration tests, and dynamics run well beyond the observed
+relaxation time are the natural next experiments.
+
+\section*{Revision history}
+\textbf{v1.1 (September 2026).} Revised after an external validity review of
+v1.0. Corrections of fact: E2 is 30 configurations / 180 replies, not ``180
+cells'', and is a partial factorial; the \textsc{numbers\_only} control is
+renamed \textsc{strategy\_stripped} to reflect what it removes; the gate channel
+is substantial (up to $\pm$60--70\% in length), not ``minor''; the E4/E5
+``loop area'' is a mean vertical separation across sampled levels. Reproducibility:
+the deposited E1 summary comes from an unreleased weak-clamp variant. Claims
+softened to what the designs support: ``calibration'' becomes mode-conditioned
+style; the monologue is the leading rather than identified causal channel;
+E5's residual is an arithmetic difference that did not collapse for $K\le12$,
+not rate-independent memory; E6 shows no evidence of bistability rather than a
+single attractor; E3's ``persistence'' is a hypothesis. Title changed
+accordingly. No data were re-run; all result files are those of v1.0 with
+corrected notes.
 
 \section*{Reproducibility}
 A clean-room implementation of the loop and all experiments (E1--E6, including

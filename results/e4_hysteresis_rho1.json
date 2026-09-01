@@ -22,5 +22,6 @@
   "hysteresis_loop_area": 0.115,
   "max_step_jump_up": 0.043,
   "reading": "With decay removed (RHO=1.0) the loop area holds at 0.115 (vs 0.126 at RHO=0.97): the hysteresis is essentially unchanged, so the path-dependence is not filter-decay inertia. NOTE: an RHO=1.0 accumulator is itself path-dependent by construction, so this control alone cannot separate loop-borne memory from accumulator arithmetic; the decisive control is the state-decoupled null in e5b_null.json.",
-  "source": "raw per-turn points in raw_e4_hysteresis_rho1.jsonl"
+  "source": "raw per-turn points in raw_e4_hysteresis_rho1.jsonl",
+  "metric_note": "hysteresis_loop_area is the MEAN VERTICAL SEPARATION (down minus up) across the seven sampled push levels, not a geometric area. Trapezoidal geometric area over push 0..0.9 is 0.116 for rho=0.97. Single stochastic trajectory per curve (temperature 0.7), no repetitions/CIs. The push is added directly to the sensor likelihood (2.5*push on the disengaging component), i.e. the estimator is driven numerically. Replies are generated from the state prefix only; the private monologue is not called in E4-E6."
 }
